@@ -6,7 +6,7 @@ import com.green.back.RemoteFileManager;
 
 public class TestRemoteFileManager {
 
-	@Test
+	/*@Test
 	public void authorizeNewAccount() {
 		RemoteFileManager remoteFileManager = new RemoteFileManager("4ler1x1mc1aw2h7", "pjo9362exbzudi3");
 		remoteFileManager.authorize();
@@ -16,5 +16,5 @@ public class TestRemoteFileManager {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	}
+	}*/
 }

@@ -17,6 +17,7 @@ import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
 
+import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
 import javax.swing.JPasswordField;
@@ -40,11 +41,12 @@ public class Login extends JFrame {
 	private JLabel lblUsername;
 	private JLabel lblPassword;
 	private JPasswordField passwordField;
-	private Canvas canvas;
+	private ImageIcon icon;
 	private JButton btnSignIn;
 	
 	private DatabaseConnection databaseConnection;
 	private JLabel lblSignUp;
+	private JLabel lblNewLabel;
 
 	/**
 	 * Launch the application.
@@ -71,7 +73,7 @@ public class Login extends JFrame {
 		
 		setResizable(false);
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		setBounds(100, 100, 267, 444);
+		setBounds(100, 100, 267, 461);
 		contentPane = new JPanel();
 		contentPane.setBackground(new Color(30, 144, 255));
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -83,14 +85,22 @@ public class Login extends JFrame {
 		gbl_contentPane.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0};
 		contentPane.setLayout(gbl_contentPane);
 		
-		canvas = new Canvas();
-		canvas.setBackground(new Color(240, 255, 240));
-		GridBagConstraints gbc_canvas = new GridBagConstraints();
-		gbc_canvas.fill = GridBagConstraints.BOTH;
-		gbc_canvas.insets = new Insets(0, 0, 5, 0);
-		gbc_canvas.gridx = 0;
-		gbc_canvas.gridy = 0;
-		contentPane.add(canvas, gbc_canvas);
+		icon = new ImageIcon();
+
+		GridBagConstraints gbc_icon = new GridBagConstraints();
+		gbc_icon.fill = GridBagConstraints.BOTH;
+		gbc_icon.insets = new Insets(0, 0, 5, 0);
+		gbc_icon.gridx = 0;
+		gbc_icon.gridy = 0;
+		
+		lblNewLabel = new JLabel("");
+		lblNewLabel.setIcon(new ImageIcon("/Users/wsgreen/Downloads/dropbox-logo-icon.png"));
+		GridBagConstraints gbc_lblNewLabel = new GridBagConstraints();
+		gbc_lblNewLabel.insets = new Insets(0, 0, 5, 0);
+		gbc_lblNewLabel.gridx = 0;
+		gbc_lblNewLabel.gridy = 0;
+		contentPane.add(lblNewLabel, gbc_lblNewLabel);
+		//contentPane.add(icon, gbc_icon);
 		
 		lblUsername = new JLabel("Username");
 		lblUsername.setFont(new Font("Sana", Font.PLAIN, 13));

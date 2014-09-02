@@ -1,6 +1,18 @@
 package com.green.back;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
+import java.util.Locale;
+
+import com.dropbox.core.DbxAppInfo;
+import com.dropbox.core.DbxAuthFinish;
+import com.dropbox.core.DbxException;
+import com.dropbox.core.DbxRequestConfig;
+import com.dropbox.core.DbxWebAuthNoRedirect;
 
 import almonds.FindCallback;
 import almonds.Parse;
@@ -10,11 +22,15 @@ import almonds.ParseQuery;
 
 public class DatabaseConnection {
 	
-	private static String username;
+	private static String username = "";
+	
+	private String APP_KEY = "4ler1x1mc1aw2h7";
+    private String APP_SECRET = "pjo9362exbzudi3";
+    private DbxAppInfo appInfo;
 	
 	public DatabaseConnection() {
 		Parse.initialize("CbGNJpqOo5rR0lXyExrmkGrruyWmPdW9fAW1kQfm", "iwW69K8wA25MWDnJT7ZQKSx32YZLaGNEdU2N5VM3");
-		username = "";
+		appInfo = new DbxAppInfo(APP_KEY, APP_SECRET);
 	}
 	
 	public String createUser(String username, String password, String email) {
@@ -61,7 +77,7 @@ public class DatabaseConnection {
 			
 			for(ParseObject po: results) {
 				if(po.getString("password").compareTo(password) == 0 ) {
-					this.username = username;
+					DatabaseConnection.username = username;
 					return true;
 				}
 			}
@@ -74,17 +90,58 @@ public class DatabaseConnection {
 		
 	}
 	
-	public void saveAccount(String accessToken) {
+	public void saveFile(String file) {
+		ParseObject fileObject = new ParseObject("Files");
+		fileObject.put("username", DatabaseConnection.username);
+		MessageDigest md;
+		try {
+			md = MessageDigest.getInstance("MD5", new sun.security.provider.Sun());
+			fileObject.put("hash", new String(md.digest(file.getBytes())));
+
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+		}
+		fileObject.put("file", file);
+		try {
+			fileObject.save();
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public void saveAccount(String userId, String accessToken) {
 		ParseObject accountObject = new ParseObject("Accounts");
-		accountObject.put("username", this.username);
+		accountObject.put("username", DatabaseConnection.username);
+		accountObject.put("userId", userId);
 		accountObject.put("dbxAccessToken", accessToken);
 		accountObject.saveInBackground();
 	}
 	
-	public void getAccounts(String username, FindCallback callback) {
+	public void getAccounts(FindCallback callback) {
 		ParseQuery query = new ParseQuery("Accounts");
 		query.whereEqualTo("username", username);
 		query.findInBackground(callback);
+	}
+	
+	/**
+	 * Dropbox authorization
+	 */
+	public void authorize() {
+		DbxRequestConfig config = new DbxRequestConfig("JavaTutorial/1.0", Locale.getDefault().toString());
+		DbxWebAuthNoRedirect webAuth = new DbxWebAuthNoRedirect(config, appInfo);
+		String authorizeUrl = webAuth.start();
+		System.out.println(authorizeUrl);
+		try {
+			String code = new BufferedReader(new InputStreamReader(System.in)).readLine().trim();
+			DbxAuthFinish authFinish = webAuth.finish(code);
+			saveAccount(authFinish.userId, authFinish.accessToken);
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (DbxException e) {
+			e.printStackTrace();
+		}
+		
 	}
 	
 }
