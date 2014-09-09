@@ -12,7 +12,7 @@ public class CombinedFileManager implements Runnable {
 	
 	public CombinedFileManager() {
 		databaseConnection = new DatabaseConnection();
-		localFileManager = new LocalFileManager("/Users/wsgreen/");
+		localFileManager = new LocalFileManager("/Users/wsgreen/InfiniteDrop");
 		Thread t = new Thread(localFileManager, "localFileManager");
 		t.start();
 	}

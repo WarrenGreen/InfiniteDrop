@@ -3,10 +3,13 @@ package com.green.back;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Locale;
+
+import javax.xml.bind.DatatypeConverter;
 
 import com.dropbox.core.DbxAppInfo;
 import com.dropbox.core.DbxAuthFinish;
@@ -71,6 +74,7 @@ public class DatabaseConnection {
 	public boolean login(String username, String password) {
 		ParseQuery query = new ParseQuery("User");
 		query.whereEqualTo("username", username);
+		query.whereEqualTo("password", password);
 		List<ParseObject> results = null;
 		try {
 			results = query.find();
@@ -91,24 +95,48 @@ public class DatabaseConnection {
 	}
 	
 	public void saveFile(String file) {
-		ParseObject fileObject = new ParseObject("Files");
-		fileObject.put("username", DatabaseConnection.username);
-		MessageDigest md;
+		
+		String hash = "";
 		try {
-			md = MessageDigest.getInstance("MD5", new sun.security.provider.Sun());
-			fileObject.put("hash", new String(md.digest(file.getBytes())));
+			MessageDigest md = MessageDigest.getInstance("MD5", new sun.security.provider.Sun());
+			md.update(file.getBytes("UTF-8"));
+			hash =  DatatypeConverter.printHexBinary(md.digest());
+			
 
 		} catch (NoSuchAlgorithmException e) {
 			e.printStackTrace();
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-		fileObject.put("file", file);
+				
+		ParseQuery query = new ParseQuery("User");
+		query.whereEqualTo("username", username);
+		query.whereEqualTo("hash", hash);
+		query.findInBackground(new FindCallback() {
+
+			@Override
+			public void done(List<ParseObject> results, ParseException arg1) {
+				if(results.size() < 1) {
+					ParseObject fileObject = new ParseObject("Files");
+					fileObject.put("username", DatabaseConnection.username);
+					fileObject.put("hash", hash);
+					fileObject.put("file", file);
+				}
+				
+			}
+			
+		});
+		
+		
+		
 		try {
 			fileObject.save();
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	}
+	} 
 	
 	public void saveAccount(String userId, String accessToken) {
 		ParseObject accountObject = new ParseObject("Accounts");
@@ -128,7 +156,7 @@ public class DatabaseConnection {
 	 * Dropbox authorization
 	 */
 	public void authorize() {
-		DbxRequestConfig config = new DbxRequestConfig("JavaTutorial/1.0", Locale.getDefault().toString());
+		DbxRequestConfig config = new DbxRequestConfig("InfiniteDrop/1.0", Locale.getDefault().toString());
 		DbxWebAuthNoRedirect webAuth = new DbxWebAuthNoRedirect(config, appInfo);
 		String authorizeUrl = webAuth.start();
 		System.out.println(authorizeUrl);

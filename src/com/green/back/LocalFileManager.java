@@ -15,12 +15,19 @@ import java.util.concurrent.ArrayBlockingQueue;
 public class LocalFileManager implements Runnable {
 	private boolean running = false;
 	private WatchService watcher;
+	private WatchDir watchDir;
 	private Path dir;
 	private ArrayBlockingQueue<WatchEvent<Path>> eventQueue;
 	
 	public LocalFileManager(String path) {
 		eventQueue = new ArrayBlockingQueue<WatchEvent<Path>>(200);
 		dir = Paths.get(path);
+		try {
+			watchDir = new WatchDir(dir, true, eventQueue);
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		try {
 			watcher = FileSystems.getDefault().newWatchService();
 			WatchKey key = dir.register(watcher,
@@ -52,7 +59,8 @@ public class LocalFileManager implements Runnable {
 
 	@Override
 	public void run() {
-		for(;;) {
+		watchDir.processEvents();
+		/*for(;;) {
 
 		    // wait for key to be signaled
 		    WatchKey key;
@@ -95,7 +103,7 @@ public class LocalFileManager implements Runnable {
 		    if (!valid) {
 		        break;
 		    }
-		}
+		}*/
 		
 	}
 
