@@ -8,6 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.WatchEvent;
+import java.util.AbstractMap.SimpleEntry;
 
 import com.green.back.LocalFileManager;
 
@@ -35,10 +36,10 @@ public class TestLocalFileManager {
 			e.printStackTrace();
 		}
 		
-		WatchEvent<Path> event = null;
+		SimpleEntry<Path, WatchEvent<Path>> event = null;
 		try {
 			event = localFileManager.takeWatchEvent();
-			Assert.assertEquals("test.txt", event.context().toString());
+			Assert.assertEquals("test.txt", event.getValue().context().toString());
 		} catch (InterruptedException e1) {
 			e1.printStackTrace();
 			Assert.fail();

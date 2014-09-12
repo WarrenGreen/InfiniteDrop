@@ -40,6 +40,7 @@ import java.nio.file.attribute.*;
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.AbstractMap.SimpleEntry;
 
 /**
  * Example to watch a directory (or tree) for changes to files.
@@ -50,7 +51,7 @@ public class WatchDir {
     private final WatchService watcher;
     private final Map<WatchKey,Path> keys;
     private final boolean recursive;
-    private ArrayBlockingQueue<WatchEvent<Path>> eventQueue;
+    private ArrayBlockingQueue<SimpleEntry<Path, WatchEvent<Path>>> eventQueue;
     private boolean trace = false;
 
     @SuppressWarnings("unchecked")
@@ -96,7 +97,7 @@ public class WatchDir {
     /**
      * Creates a WatchService and registers the given directory
      */
-    WatchDir(Path dir, boolean recursive, ArrayBlockingQueue<WatchEvent<Path>> eventQueue) throws IOException {
+    WatchDir(Path dir, boolean recursive, ArrayBlockingQueue<SimpleEntry<Path, WatchEvent<Path>>> eventQueue) throws IOException {
         this.watcher = FileSystems.getDefault().newWatchService();
         this.keys = new HashMap<WatchKey,Path>();
         this.recursive = recursive;
@@ -149,7 +150,7 @@ public class WatchDir {
 
                 // print out event
                 System.out.format("%s: %s\n", event.kind().name(), child);
-                eventQueue.add(ev);
+                eventQueue.add(new SimpleEntry<Path, WatchEvent<Path>>(child, ev));
 
                 // if directory is created, and watching recursively, then
                 // register it and its sub-directories

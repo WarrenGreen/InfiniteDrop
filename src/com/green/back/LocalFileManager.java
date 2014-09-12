@@ -10,17 +10,19 @@ import java.nio.file.WatchEvent;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 import java.nio.file.StandardWatchEventKinds;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.concurrent.ArrayBlockingQueue;
 
 public class LocalFileManager implements Runnable {
+	private final String BASE_DIR = System.getProperty("user.home") + "/InfiniteDrop/";
 	private boolean running = false;
 	private WatchService watcher;
 	private WatchDir watchDir;
 	private Path dir;
-	private ArrayBlockingQueue<WatchEvent<Path>> eventQueue;
+	private ArrayBlockingQueue<SimpleEntry<Path, WatchEvent<Path>>> eventQueue;
 	
 	public LocalFileManager(String path) {
-		eventQueue = new ArrayBlockingQueue<WatchEvent<Path>>(200);
+		eventQueue = new ArrayBlockingQueue<SimpleEntry<Path, WatchEvent<Path>>>(200);
 		dir = Paths.get(path);
 		try {
 			watchDir = new WatchDir(dir, true, eventQueue);
@@ -39,7 +41,7 @@ public class LocalFileManager implements Runnable {
 		}
 	}
 	
-	public WatchEvent<Path> takeWatchEvent() throws InterruptedException {
+	public SimpleEntry<Path, WatchEvent<Path>> takeWatchEvent() throws InterruptedException {
 		return eventQueue.take();
 	}
 	
@@ -53,57 +55,16 @@ public class LocalFileManager implements Runnable {
 		}
 	}
 	
-	public void updateLocalPath(String path, String file) {
-		
+	public String getRelativePath(String path) {
+		if(path.length() > BASE_DIR.length())
+			return path.substring(BASE_DIR.length());
+		else
+			return "";
 	}
 
 	@Override
 	public void run() {
 		watchDir.processEvents();
-		/*for(;;) {
-
-		    // wait for key to be signaled
-		    WatchKey key;
-		    try {
-		        key = watcher.take();
-		    } catch (InterruptedException x) {
-		        return;
-		    }
-
-		    for (WatchEvent<?> event: key.pollEvents()) {
-
-		        // This key is registered only
-		        // for ENTRY_CREATE events,
-		        // but an OVERFLOW event can
-		        // occur regardless if events
-		        // are lost or discarded.
-		        if (event.kind() == StandardWatchEventKinds.OVERFLOW) {
-		            continue;
-		        }
-		        
-		        if( event.context().toString().endsWith(".swp")) {
-		        	continue;
-		        }
-
-		        // The filename is the
-		        // context of the event.
-		        WatchEvent<Path> ev = (WatchEvent<Path>)event;
-		        Path filename = ev.context();
-
-		        // Email the file to the
-		        //  specified email alias.
-		        //onEvent(ev);
-		        eventQueue.add(ev);
-		    }
-
-		    // Reset the key -- this step is critical if you want to
-		    // receive further watch events.  If the key is no longer valid,
-		    // the directory is inaccessible so exit the loop.
-		    boolean valid = key.reset();
-		    if (!valid) {
-		        break;
-		    }
-		}*/
 		
 	}
 

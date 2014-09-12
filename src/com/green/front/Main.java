@@ -53,19 +53,7 @@ public class Main {
 	 */
 	public Main() {
 		initialize();
-		databaseConnection.getAccounts(new FindCallback() {
-
-			@Override
-			public void done(List<ParseObject> results, ParseException arg1) {
-				String[] userIds = new String[results.size()];
-				for(int i=0; i<userIds.length; i++)
-					userIds[i] = results.get(i).getString("userId");
-				accountList.setListData(userIds);
-				
-			}
-			
-		});
-		
+		updateAccounts();
 		combinedFileManager = new CombinedFileManager();
 		Thread t = new Thread(combinedFileManager, "combinedFileManager");
 		t.start();
@@ -113,18 +101,7 @@ public class Main {
 		btnAddAccount.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				databaseConnection.authorize();
-				databaseConnection.getAccounts(new FindCallback() {
-
-					@Override
-					public void done(List<ParseObject> results, ParseException arg1) {
-						String[] userIds = new String[results.size()];
-						for(int i=0; i<userIds.length; i++)
-							userIds[i] = results.get(i).getString("userId");
-						accountList.setListData(userIds);
-						
-					}
-					
-				});
+				updateAccounts();
 			}
 		});
 		GridBagConstraints gbc_btnAddAccount = new GridBagConstraints();
@@ -142,6 +119,20 @@ public class Main {
 		
 		JMenuItem mntmClose = new JMenuItem("Close");
 		mnFile.add(mntmClose);
+	}
+	
+	private void updateAccounts() {
+		Thread t = new Thread(new Runnable() {
+	         public void run()
+	         {
+	        	 List<ParseObject> results = databaseConnection.getAccounts();
+	        	 String[] userIds = new String[results.size()];
+					for(int i=0; i<userIds.length; i++)
+						userIds[i] = results.get(i).getString("userId");
+					accountList.setListData(userIds);
+	         }
+		});
+		t.start();
 	}
 	
 	
