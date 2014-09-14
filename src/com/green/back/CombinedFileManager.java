@@ -46,11 +46,17 @@ public class CombinedFileManager implements Runnable {
 			String accnt = remoteFileManager.getLargestAccount();
 			String path = localFileManager.getRelativePath(e.getKey().toString());
 			String parent = localFileManager.getRelativePath(e.getKey().getParent().toString());
+			if( e.getKey().toFile().isDirectory()) {
+				remoteFileManager.saveFolder(e.getKey());
+			} else {
+				remoteFileManager.saveFile(e.getKey());
+			}
 			databaseConnection.saveFile(path, getHash(parent), accnt);
 			System.out.println("Created file: " + ev.context());
 		} else if (ev.kind() == StandardWatchEventKinds.ENTRY_DELETE) {
 			String hash = getHash(localFileManager.getRelativePath(e.getKey().toString()));
-			databaseConnection.deleteFile(hash);
+			String client = databaseConnection.deleteFile(hash);
+			remoteFileManager.deleteFile(hash, client);
 			System.out.println("Deleted file: " + ev.context());
 		} else if (ev.kind() == StandardWatchEventKinds.ENTRY_MODIFY) {
 			System.out.println("Changed file: " + ev.context());

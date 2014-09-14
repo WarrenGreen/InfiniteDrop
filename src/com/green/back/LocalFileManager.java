@@ -14,7 +14,7 @@ import java.util.AbstractMap.SimpleEntry;
 import java.util.concurrent.ArrayBlockingQueue;
 
 public class LocalFileManager implements Runnable {
-	private final String BASE_DIR = System.getProperty("user.home") + "/InfiniteDrop/";
+	private final static String BASE_DIR = System.getProperty("user.home") + "/InfiniteDrop/";
 	private boolean running = false;
 	private WatchService watcher;
 	private WatchDir watchDir;
@@ -55,7 +55,7 @@ public class LocalFileManager implements Runnable {
 		}
 	}
 	
-	public String getRelativePath(String path) {
+	public static String getRelativePath(String path) {
 		if(path.length() > BASE_DIR.length())
 			return path.substring(BASE_DIR.length());
 		else

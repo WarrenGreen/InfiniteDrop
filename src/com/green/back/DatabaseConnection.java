@@ -30,13 +30,13 @@ import almonds.ParseQuery;
 public class DatabaseConnection {
 
 	private static String username = "";
-	private static ConcurrentHashMap<String, DbxClient> clients= new ConcurrentHashMap<String, DbxClient>();
+	private static ConcurrentHashMap<String, DbxClient> clients = new ConcurrentHashMap<String, DbxClient>();
 
 	private String APP_KEY = "4ler1x1mc1aw2h7";
 	private String APP_SECRET = "pjo9362exbzudi3";
-	private final DbxRequestConfig config = new DbxRequestConfig("InfiniteDrop/1.0",
-			Locale.getDefault().toString());
-	private final DbxAppInfo appInfo  = new DbxAppInfo(APP_KEY, APP_SECRET);
+	private final DbxRequestConfig config = new DbxRequestConfig(
+			"InfiniteDrop/1.0", Locale.getDefault().toString());
+	private final DbxAppInfo appInfo = new DbxAppInfo(APP_KEY, APP_SECRET);
 	private final static String ROOT_HASH = "d41d8cd98f00b204e9800998ecf8427e";
 
 	public DatabaseConnection() {
@@ -88,8 +88,8 @@ public class DatabaseConnection {
 		List<ParseObject> results = null;
 		try {
 			results = query.find();
-			
-			if(!results.isEmpty()) {
+
+			if (!results.isEmpty()) {
 				DatabaseConnection.username = username;
 				loginDbx(getAccounts());
 				return true;
@@ -102,18 +102,14 @@ public class DatabaseConnection {
 		return false;
 
 	}
-	
+
 	private void loginDbx(List<ParseObject> accounts) {
-		//final List<ParseObject> accnts = accounts;
-		//Thread t = new Thread() {
-			//public void run() {
-				for(ParseObject po: accounts) {
-					DbxClient client = new DbxClient(config, po.getString("dbxAccessToken"));
-					DatabaseConnection.clients.put(po.getString("dbxAccessToken"), client);
-					System.out.println(DatabaseConnection.clients.size());
-				}
-			//}
-		//};
+
+		for (ParseObject po : accounts) {
+			DbxClient client = new DbxClient(config, po.getString("dbxAccessToken"));
+			DatabaseConnection.clients.put(po.getString("dbxAccessToken"),
+					client);
+		}
 	}
 
 	public synchronized void saveFile(String file, String parent, String accnt) {
@@ -142,38 +138,38 @@ public class DatabaseConnection {
 		}
 
 	}
-	
-	public void deleteFile(String file) {	
-		if( file.compareTo(ROOT_HASH) == 0 )
-			return;
-		
+
+	public String  deleteFile(String file) {
+		if (file.compareTo(ROOT_HASH) == 0)
+			return null;
+
 		ParseQuery queryChildren = new ParseQuery("Files");
 		queryChildren.whereEqualTo("username", DatabaseConnection.username);
 		queryChildren.whereEqualTo("parent", file);
 		try {
 			List<ParseObject> results = queryChildren.find();
-			for(ParseObject poChild: results) {
+			for (ParseObject poChild : results) {
 				deleteFile(poChild.getString("hash"));
 			}
 		} catch (ParseException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		
+
 		ParseQuery query = new ParseQuery("Files");
 		query.whereEqualTo("username", DatabaseConnection.username);
 		query.whereEqualTo("hash", file);
-		query.findInBackground(new FindCallback() {
-
-			@Override
-			public void done(List<ParseObject> objects, ParseException e) {
-				for(ParseObject po: objects) {
-					
-					po.deleteInBackground();
-				}
-			}
-			
-		});
+		try {
+			List<ParseObject> results = query.find();
+			String client = results.get(0).getString("dbxAccount");
+			results.get(0).delete();
+			return client;
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return null;
 	}
 
 	public void saveAccount(String userId, String accessToken) {
@@ -193,14 +189,18 @@ public class DatabaseConnection {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 		return null;
 	}
-	
+
 	public List<DbxClient> getDbxClients() {
 		ArrayList<DbxClient> ret = new ArrayList<DbxClient>();
 		ret.addAll(DatabaseConnection.clients.values());
 		return ret;
+	}
+	
+	public DbxClient getDbxClient(String key) {
+		return DatabaseConnection.clients.get(key);
 	}
 
 	/**
