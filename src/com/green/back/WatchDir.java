@@ -149,6 +149,11 @@ public class WatchDir {
                 Path child = dir.resolve(name);
 
                 // print out event
+                if(name.endsWith(".swp")){ 
+                	continue;
+                }else if(name.endsWith(".DS_Store")){
+                	continue;
+                }
                 System.out.format("%s: %s\n", event.kind().name(), child);
                 eventQueue.add(new SimpleEntry<Path, WatchEvent<Path>>(child, ev));
 

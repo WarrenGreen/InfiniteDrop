@@ -15,14 +15,13 @@ import java.util.concurrent.ArrayBlockingQueue;
 
 public class LocalFileManager implements Runnable {
 	private final static String BASE_DIR = System.getProperty("user.home") + "/InfiniteDrop/";
-	private boolean running = false;
 	private WatchService watcher;
 	private WatchDir watchDir;
 	private Path dir;
-	private ArrayBlockingQueue<SimpleEntry<Path, WatchEvent<Path>>> eventQueue;
+	private static ArrayBlockingQueue<SimpleEntry<Path, WatchEvent<Path>>> eventQueue;
 	
 	public LocalFileManager(String path) {
-		eventQueue = new ArrayBlockingQueue<SimpleEntry<Path, WatchEvent<Path>>>(200);
+		LocalFileManager.eventQueue = new ArrayBlockingQueue<SimpleEntry<Path, WatchEvent<Path>>>(200);
 		dir = Paths.get(path);
 		try {
 			watchDir = new WatchDir(dir, true, eventQueue);
@@ -41,8 +40,13 @@ public class LocalFileManager implements Runnable {
 		}
 	}
 	
+	@Override
+	public void run() {
+		watchDir.processEvents();
+		
+	}
 	public SimpleEntry<Path, WatchEvent<Path>> takeWatchEvent() throws InterruptedException {
-		return eventQueue.take();
+		return LocalFileManager.eventQueue.take();
 	}
 	
 	public synchronized void onEvent(WatchEvent<Path> ev) {
@@ -61,11 +65,14 @@ public class LocalFileManager implements Runnable {
 		else
 			return "";
 	}
-
-	@Override
-	public void run() {
-		watchDir.processEvents();
-		
+	
+	public void deleteFile(String path) {
+		try {
+			Files.delete(Paths.get(BASE_DIR + path));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 }
