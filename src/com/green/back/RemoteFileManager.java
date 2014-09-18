@@ -3,6 +3,7 @@ package com.green.back;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.WatchEvent;
@@ -99,6 +100,31 @@ public class RemoteFileManager implements Runnable {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+	
+	public DbxEntry.File downloadFile(String hash) {
+		ParseObject record = databaseConnection.getFileRecordFromHash(hash);
+		String localName = record.getString("file");
+		DbxClient client = databaseConnection.getDbxClient(record.getString("dbxAccount"));
+		FileOutputStream outputStream;
+
+		try {
+			outputStream = new FileOutputStream(LocalFileManager.BASE_DIR + "/" + localName);
+		    DbxEntry.File downloadedFile = client.getFile("/magnum-opus.txt", null, outputStream);
+		    System.out.println("Metadata: " + downloadedFile.toString());
+		    outputStream.close();
+		    return downloadedFile;
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (DbxException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 	public String getLargestAccount() {

@@ -127,6 +127,21 @@ public class DatabaseConnection {
 		return null;
 		
 	}
+	
+	public ParseObject getFileRecordFromHash(String hash) {
+		ParseQuery query = new ParseQuery("Files");
+		query.whereEqualTo("hash", hash.toUpperCase());
+		try {
+			List<ParseObject> results = query.find();
+			if(results.size() > 0) 
+				return results.get(0);
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return null;
+	}
 
 	public synchronized void saveFile(String file, String parent, String accnt) {
 

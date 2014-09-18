@@ -13,6 +13,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.xml.bind.DatatypeConverter;
 
+import com.dropbox.core.DbxClient;
 import com.dropbox.core.DbxDelta.Entry;
 import com.dropbox.core.DbxEntry;
 
@@ -80,6 +81,7 @@ public class CombinedFileManager implements Runnable {
 		}
 		
 		if( ev.kind() == StandardWatchEventKinds.ENTRY_CREATE) {
+			incrementLog(hash);
 			String accnt = remoteFileManager.getLargestAccount();
 			String path = localFileManager.getRelativePath(e.getKey().toString());
 			String parent = localFileManager.getRelativePath(e.getKey().getParent().toString());
@@ -91,6 +93,7 @@ public class CombinedFileManager implements Runnable {
 			databaseConnection.saveFile(path, getHash(parent), accnt);
 			System.out.println("Created file: " + ev.context());
 		} else if (ev.kind() == StandardWatchEventKinds.ENTRY_DELETE) {
+			incrementLog(hash);
 			String client = databaseConnection.deleteFile(hash);
 			remoteFileManager.deleteFile(hash, client);
 			System.out.println("Deleted file: " + ev.context());
@@ -100,12 +103,20 @@ public class CombinedFileManager implements Runnable {
 	}
 	
 	private void handleRemoteEvent(Entry<DbxEntry> entry) {
-		System.out.println("Received Dbx Event: " + entry.lcPath);
 		String hash = entry.lcPath.substring(1).toUpperCase();
+		if(checkEventRepeat(hash)) {
+			return;
+		}
+		System.out.println("Received Dbx Event: " + entry.lcPath);
 		if( entry.metadata == null ) {
 			incrementLog(hash);
 			localFileManager.deleteFile(databaseConnection.getFileName(hash));
+			databaseConnection.deleteFile(hash);
 			System.out.println("Deleted Local File");
+		} else {
+			incrementLog(hash);
+			remoteFileManager.downloadFile(hash);
+			System.out.println("Downloaded File");
 		}
 	}
 	

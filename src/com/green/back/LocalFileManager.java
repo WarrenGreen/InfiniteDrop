@@ -14,7 +14,7 @@ import java.util.AbstractMap.SimpleEntry;
 import java.util.concurrent.ArrayBlockingQueue;
 
 public class LocalFileManager implements Runnable {
-	private final static String BASE_DIR = System.getProperty("user.home") + "/InfiniteDrop/";
+	public final static String BASE_DIR = System.getProperty("user.home") + "/InfiniteDrop/";
 	private WatchService watcher;
 	private WatchDir watchDir;
 	private Path dir;

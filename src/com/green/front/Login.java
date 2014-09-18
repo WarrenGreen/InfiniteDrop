@@ -26,6 +26,8 @@ import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.Font;
 
 import org.eclipse.wb.swing.FocusTraversalOnArray;
@@ -153,6 +155,17 @@ public class Login extends JFrame {
 		lblSignUp = new JLabel("or Sign Up!");
 		lblSignUp.setFont(new Font("Sana", Font.BOLD, 13));
 		lblSignUp.setForeground(new Color(255, 255, 255));
+		lblSignUp.addMouseListener(new MouseAdapter()  
+		{  
+		    public void mouseClicked(MouseEvent e)  
+		    {  
+		       // you can open a new frame here as
+		       // i have assumed you have declared "frame" as instance variable
+		       frame = new JFrame("new frame");
+		       frame.setVisible(true);
+
+		    }  
+		}); 
 		GridBagConstraints gbc_lblSignUp = new GridBagConstraints();
 		gbc_lblSignUp.insets = new Insets(0, 0, 5, 0);
 		gbc_lblSignUp.gridx = 0;

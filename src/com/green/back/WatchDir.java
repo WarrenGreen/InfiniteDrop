@@ -149,9 +149,9 @@ public class WatchDir {
                 Path child = dir.resolve(name);
 
                 // print out event
-                if(name.endsWith(".swp")){ 
+                if(child.toString().endsWith("swp")){ 
                 	continue;
-                }else if(name.endsWith(".DS_Store")){
+                }else if(child.toString().endsWith("DS_Store")){
                 	continue;
                 }
                 System.out.format("%s: %s\n", event.kind().name(), child);
