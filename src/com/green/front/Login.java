@@ -32,6 +32,7 @@ import java.awt.Font;
 
 import org.eclipse.wb.swing.FocusTraversalOnArray;
 
+import com.green.back.CombinedFileManager;
 import com.green.back.DatabaseConnection;
 
 import java.awt.Component;
@@ -45,10 +46,13 @@ public class Login extends JFrame {
 	private JPasswordField passwordField;
 	private ImageIcon icon;
 	private JButton btnSignIn;
-	
-	private DatabaseConnection databaseConnection;
 	private JLabel lblSignUp;
 	private JLabel lblNewLabel;
+	private JLabel lblError;
+	
+	private DatabaseConnection databaseConnection;
+	
+	private static final String LOGIN_ERROR = "Wrong Username/Password";
 
 	/**
 	 * Launch the application.
@@ -159,10 +163,8 @@ public class Login extends JFrame {
 		{  
 		    public void mouseClicked(MouseEvent e)  
 		    {  
-		       // you can open a new frame here as
-		       // i have assumed you have declared "frame" as instance variable
-		       frame = new JFrame("new frame");
-		       frame.setVisible(true);
+		       SignUp signup = new SignUp();
+		       signup.setVisible(true);
 
 		    }  
 		}); 
@@ -171,6 +173,14 @@ public class Login extends JFrame {
 		gbc_lblSignUp.gridx = 0;
 		gbc_lblSignUp.gridy = 7;
 		contentPane.add(lblSignUp, gbc_lblSignUp);
+		
+		lblError = new JLabel("");
+		lblError.setForeground(Color.RED);
+		GridBagConstraints gbc_lblError = new GridBagConstraints();
+		gbc_lblError.anchor = GridBagConstraints.WEST;
+		gbc_lblError.gridx = 0;
+		gbc_lblError.gridy = 8;
+		contentPane.add(lblError, gbc_lblError);
 		contentPane.setFocusTraversalPolicy(new FocusTraversalOnArray(new Component[]{usernameField, passwordField, btnSignIn}));
 	}
 	
@@ -185,7 +195,8 @@ public class Login extends JFrame {
 			boolean loggedIn = false;
 			
 			if ( !usernameField.getText().isEmpty() && passwordField.getPassword().length > 0) {
-				loggedIn = databaseConnection.login(usernameField.getText(), passwordField.getText());
+				loggedIn = databaseConnection.login(usernameField.getText(), 
+						CombinedFileManager.getHash(passwordField.getText()));
 			}
 			
 			if( loggedIn) {
@@ -199,6 +210,8 @@ public class Login extends JFrame {
 						}
 					}
 				});
+			}else {
+				lblError.setText(Login.LOGIN_ERROR);
 			}
 		}
 	}

@@ -37,6 +37,7 @@ public class DatabaseConnection {
 	private final DbxRequestConfig config = new DbxRequestConfig(
 			"InfiniteDrop/1.0", Locale.getDefault().toString());
 	private final DbxAppInfo appInfo = new DbxAppInfo(APP_KEY, APP_SECRET);
+	private DbxWebAuthNoRedirect webAuth = new DbxWebAuthNoRedirect(config, appInfo);
 	private final static String ROOT_HASH = "d41d8cd98f00b204e9800998ecf8427e";
 
 	public DatabaseConnection() {
@@ -78,6 +79,20 @@ public class DatabaseConnection {
 			}
 		} catch (ParseException e) {
 			e.printStackTrace();
+		}
+	}
+	
+	public boolean signUp(String username, String password, String email) {
+		ParseObject newUser = new ParseObject("User");
+		newUser.put("username", username);
+		newUser.put("password", CombinedFileManager.getHash(password));
+		newUser.put("email", email);
+		try {
+			newUser.save();
+			return true;
+		} catch (ParseException e1) {
+			e1.printStackTrace();
+			return false;
 		}
 	}
 
@@ -237,24 +252,20 @@ public class DatabaseConnection {
 	/**
 	 * Dropbox authorization
 	 */
-	public void authorize() {
-		DbxWebAuthNoRedirect webAuth = new DbxWebAuthNoRedirect(config, appInfo);
-		String authorizeUrl = webAuth.start();
-		System.out.println(authorizeUrl);
+	public String startAuth() {
+		return webAuth.start();
+	}
+	
+	public void finishAuth(String code) {
 		try {
-			String code = new BufferedReader(new InputStreamReader(System.in))
-					.readLine().trim();
 			DbxAuthFinish authFinish = webAuth.finish(code);
 			String accessToken = authFinish.accessToken;
 			DbxClient client = new DbxClient(config, accessToken);
 			clients.put(accessToken, client);
 			saveAccount(authFinish.userId, accessToken);
-		} catch (IOException e) {
-			e.printStackTrace();
 		} catch (DbxException e) {
 			e.printStackTrace();
 		}
-
 	}
 
 }

@@ -15,6 +15,7 @@ import javax.swing.JList;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 
 import almonds.FindCallback;
 import almonds.ParseException;
@@ -100,7 +101,9 @@ public class Main {
 		JButton btnAddAccount = new JButton("+");
 		btnAddAccount.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				databaseConnection.authorize();
+				String auth = databaseConnection.startAuth();
+				String token = JOptionPane.showInputDialog(null, "Enter code from url", auth);
+				databaseConnection.finishAuth(token);
 				updateAccounts();
 			}
 		});

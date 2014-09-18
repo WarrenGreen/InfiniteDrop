@@ -144,12 +144,12 @@ public class CombinedFileManager implements Runnable {
 		}
 	}
 	
-	public static String getHash(String file) {
+	public static String getHash(String input) {
 		String hash = null;
 		try {
 			MessageDigest md = MessageDigest.getInstance("MD5",
 					new sun.security.provider.Sun());
-			md.update(file.getBytes("UTF-8"));
+			md.update(input.getBytes("UTF-8"));
 			hash = DatatypeConverter.printHexBinary(md.digest());
 
 		} catch (NoSuchAlgorithmException e) {
