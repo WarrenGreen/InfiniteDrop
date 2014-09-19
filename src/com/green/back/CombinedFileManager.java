@@ -3,7 +3,9 @@ package com.green.back;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardWatchEventKinds;
 import java.nio.file.WatchEvent;
 import java.security.MessageDigest;
@@ -26,7 +28,7 @@ public class CombinedFileManager implements Runnable {
 	
 	public CombinedFileManager() {
 		databaseConnection = new DatabaseConnection();
-		localFileManager = new LocalFileManager("/Users/wsgreen/InfiniteDrop");
+		localFileManager = new LocalFileManager();
 		remoteFileManager = new RemoteFileManager();
 		Thread localManager = new Thread(localFileManager, "localFileManager");
 		Thread remoteManager = new Thread(remoteFileManager, "remoteFileManager");
@@ -113,6 +115,11 @@ public class CombinedFileManager implements Runnable {
 			localFileManager.deleteFile(databaseConnection.getFileName(hash));
 			databaseConnection.deleteFile(hash);
 			System.out.println("Deleted Local File");
+		} else if(entry.metadata.isFolder()){
+			incrementLog(hash);
+			String localFile = databaseConnection.getFileName(hash);
+			localFileManager.createFolder(LocalFileManager.getFullPath(localFile));
+			System.out.println("Created folder");
 		} else {
 			incrementLog(hash);
 			remoteFileManager.downloadFile(hash);
@@ -159,6 +166,10 @@ public class CombinedFileManager implements Runnable {
 			e.printStackTrace();
 		}
 		return hash;
+	}
+	
+	public void saveState() {
+		remoteFileManager.saveState();
 	}
 	
 }

@@ -20,6 +20,27 @@ public class LocalFileManager implements Runnable {
 	private Path dir;
 	private static ArrayBlockingQueue<SimpleEntry<Path, WatchEvent<Path>>> eventQueue;
 	
+	public LocalFileManager() {		
+		LocalFileManager.eventQueue = new ArrayBlockingQueue<SimpleEntry<Path, WatchEvent<Path>>>(200);
+		dir = Paths.get(LocalFileManager.BASE_DIR);
+		createHomeFolder(dir);
+		try {
+			watchDir = new WatchDir(dir, true, eventQueue);
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		try {
+			watcher = FileSystems.getDefault().newWatchService();
+			WatchKey key = dir.register(watcher,
+					StandardWatchEventKinds.ENTRY_CREATE,
+					StandardWatchEventKinds.ENTRY_DELETE,
+					StandardWatchEventKinds.ENTRY_MODIFY);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
 	public LocalFileManager(String path) {
 		LocalFileManager.eventQueue = new ArrayBlockingQueue<SimpleEntry<Path, WatchEvent<Path>>>(200);
 		dir = Paths.get(path);
@@ -49,6 +70,12 @@ public class LocalFileManager implements Runnable {
 		return LocalFileManager.eventQueue.take();
 	}
 	
+	private void createHomeFolder(Path path) {
+		if(!Files.exists(path)) {
+			new File(path.toString()).mkdirs();
+		}
+	}
+	
 	public synchronized void onEvent(WatchEvent<Path> ev) {
 		if( ev.kind() == StandardWatchEventKinds.ENTRY_CREATE) {
 			System.out.println("Created file: " + ev.context());
@@ -64,6 +91,14 @@ public class LocalFileManager implements Runnable {
 			return path.substring(BASE_DIR.length());
 		else
 			return "";
+	}
+	
+	public static String getFullPath(String path) {
+		return LocalFileManager.BASE_DIR  + path;
+	}
+	
+	public void createFolder(String path) {
+		new File(path).mkdirs();
 	}
 	
 	public void deleteFile(String path) {

@@ -1,15 +1,19 @@
 package com.green.back;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.WatchEvent;
 import java.util.HashMap;
 import java.util.List;
 import java.util.AbstractMap.SimpleEntry;
+import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 
 import almonds.FindCallback;
@@ -23,11 +27,15 @@ public class RemoteFileManager implements Runnable {
 	private DatabaseConnection databaseConnection;
 	private HashMap<String, String> cursors;
 	private ArrayBlockingQueue<Entry<DbxEntry>> eventQueue;
+	
+	private static final String SAVE_FILE = LocalFileManager.BASE_DIR + ".cursors";
 
 	public RemoteFileManager() {
 		cursors = new HashMap<String, String>();
 		databaseConnection = new DatabaseConnection();
 		eventQueue = new ArrayBlockingQueue<Entry<DbxEntry>>(200);
+		
+		readState();
 	}
 
 	public void run() {
@@ -55,6 +63,52 @@ public class RemoteFileManager implements Runnable {
 
 	public Entry<DbxEntry> takeDbxEvent() throws InterruptedException {
 		return eventQueue.take();
+	}
+	
+	public void readState() {
+		List<DbxClient> clients = databaseConnection.getDbxClients();
+		HashMap<String, String> tempCursors = new HashMap<String, String>();
+		File saveFile = new File(RemoteFileManager.SAVE_FILE);
+		BufferedReader br;
+		try {
+			br = new BufferedReader(new FileReader(saveFile));
+			String line;
+			while ((line = br.readLine()) != null) {
+			   String left = line.substring(0, line.indexOf(":"));
+			   String right = line.substring(line.indexOf(":") + 1);
+			   tempCursors.put(left, right);
+			}
+			
+			br.close();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		for(DbxClient client: clients) {
+			if(tempCursors.containsKey(client.getAccessToken())) {
+				cursors.put(client.getAccessToken(), tempCursors.get(client.getAccessToken()));
+			}
+		}
+		
+	}
+	
+	public void saveState() {
+		File saveFile = new File(RemoteFileManager.SAVE_FILE);
+		try {
+			FileWriter f = new FileWriter(saveFile);
+			for(Map.Entry<String, String> e: cursors.entrySet()) {
+				f.write(e.getKey() + ":" + e.getValue() + "\n");
+			}
+			f.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 	}
 
 	public void saveFile(Path path) {
@@ -86,6 +140,7 @@ public class RemoteFileManager implements Runnable {
 				.getRelativePath(path.toString()));
 		try {
 			client.createFolder("/" + hash);
+			System.out.println("Created Folder");
 		} catch (DbxException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
