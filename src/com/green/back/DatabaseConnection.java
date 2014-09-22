@@ -32,8 +32,14 @@ public class DatabaseConnection {
 	private static String username = "";
 	private static ConcurrentHashMap<String, DbxClient> clients = new ConcurrentHashMap<String, DbxClient>();
 
-	private String APP_KEY = "4ler1x1mc1aw2h7";
-	private String APP_SECRET = "pjo9362exbzudi3";
+	//Dropbox API Keys
+	private static final String APP_KEY = "";
+	private static final String APP_SECRET = "";
+	
+	//Parse API Keys
+	private static final String APP_ID = "";
+	private static final String REST_KEY = "";
+	
 	private final DbxRequestConfig config = new DbxRequestConfig(
 			"InfiniteDrop/1.0", Locale.getDefault().toString());
 	private final DbxAppInfo appInfo = new DbxAppInfo(APP_KEY, APP_SECRET);
@@ -41,8 +47,7 @@ public class DatabaseConnection {
 	private final static String ROOT_HASH = "d41d8cd98f00b204e9800998ecf8427e";
 
 	public DatabaseConnection() {
-		Parse.initialize("CbGNJpqOo5rR0lXyExrmkGrruyWmPdW9fAW1kQfm",
-				"iwW69K8wA25MWDnJT7ZQKSx32YZLaGNEdU2N5VM3");
+		Parse.initialize(APP_ID, REST_KEY);
 	}
 
 	public String createUser(String username, String password, String email) {

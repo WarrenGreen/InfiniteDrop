@@ -78,7 +78,7 @@ public class Login extends JFrame {
 		databaseConnection = new DatabaseConnection();
 		
 		setResizable(false);
-		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 267, 461);
 		contentPane = new JPanel();
 		contentPane.setBackground(new Color(30, 144, 255));

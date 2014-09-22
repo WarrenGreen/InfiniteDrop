@@ -147,13 +147,16 @@ public class WatchDir {
                 WatchEvent<Path> ev = cast(event);
                 Path name = ev.context();
                 Path child = dir.resolve(name);
-
-                // print out event
-                if(child.toString().endsWith("swp")){ 
-                	continue;
-                }else if(child.toString().endsWith("DS_Store")){
-                	continue;
+                
+                HashSet<String> ignore = new HashSet<String>();
+                ignore.add("swp");
+                ignore.add("DS_Store");
+                ignore.add("cursors");
+                for(String s: ignore) {
+                	if(child.toString().endsWith(s)) continue;
                 }
+                
+                // print out event
                 System.out.format("%s: %s\n", event.kind().name(), child);
                 eventQueue.add(new SimpleEntry<Path, WatchEvent<Path>>(child, ev));
 
