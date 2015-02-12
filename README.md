@@ -3,7 +3,7 @@ A distributed filesystem across dropbox accounts to offer a dropbox experience
 with potentially infinite space for free!
 
 ##Install
-- Download the latest build here: http://www.filedropper.com/infinitedrop
+- Download the latest build [here](https://github.com/WarrenGreen/InfiniteDrop/blob/master/InfiniteDrop.jar?raw=true)
 - Add dropbox accounts by clicking the (+) button after logging in and
   open the provided link in your browser.
 
