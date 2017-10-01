@@ -12,7 +12,7 @@ public class TestDatabaseConnection {
 	
 	@Before
 	public void setup() {
-		databaseConnection.createUser("testUser", "poop", "tits@gmail.com");
+		databaseConnection.createUser("testUser", "tt", "tt@gmail.com");
 		try {
 			Thread.sleep(3000L);
 		} catch (InterruptedException e) {
@@ -29,25 +29,25 @@ public class TestDatabaseConnection {
 	public void TestCreateUserFail() {
 		String result = databaseConnection.createUser("testUser", "password", "ttt");
 		Assert.assertEquals("Username already exists.", result);
-		result = databaseConnection.createUser("ttt" , "password", "tits@gmail.com");
+		result = databaseConnection.createUser("ttt" , "password", "tt@gmail.com");
 		Assert.assertEquals("Account with this email already exists.", result);
 	}
 	
 	@Test
 	public void TestLoginSuccess() {
-		boolean loggedin = databaseConnection.login("testUser", "poop");
+		boolean loggedin = databaseConnection.login("testUser", "tt");
 		Assert.assertTrue(loggedin);
 	}
 	
 	@Test
 	public void TestLoginUsernameFail() {
-		boolean loggedin = databaseConnection.login("notUser", "poop");
+		boolean loggedin = databaseConnection.login("notUser", "tt");
 		Assert.assertFalse(loggedin);
 	}
 	
 	@Test
 	public void TestLoginPasswordFail() {
-		boolean loggedin = databaseConnection.login("testUser", "dong");
+		boolean loggedin = databaseConnection.login("testUser", "tt");
 		Assert.assertFalse(loggedin);
 	}
 
